@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# shellcheck shell=sh
+
+# set -x
+
+###############################################
+#       Bourne Shell utilities                #
+#       vcsaturninus@protonmail.com           #
+###############################################
+
+. ./shlib.sh
+
+# Simple pgrep : print the PID(s) associated 
+# with matching process name (substring);
+#
+# $1 = proc name string (or substring)
+pgrep(){
+    ps_command='ps -e'
+    # fall back to simpler 'ps ww' on constrained systems with simple ps
+    [ ! "$(__exists "$ps_command")" ] && ps_command="ps ww"
+    pids="$($ps_command | grep -i "${1:?}" | grep -v -e grep -e "$0" -e "echo")"
+    pids="$(__column_to_list "$pids" " ")"
+    echo "$pids"
+}
+
+# $1 = progname string or substring
+# $2 = signal to send to matching PIDs
+pkill(){
+    pids=$(pgrep "${1:?}")
+    for pid in $pids; do
+        kill -"${2:-2}" "$pid"
+    done
+}
+
+usage(){
+cat<<EOF
+$0
+
+SYNOPSYS
+ pgrep NAME
+ pkill NAME SIGNAL
+EOF
+
+}
+
+# help
+[ $# -eq 0 ] && { usage ; exit 0 ; }
+
+# invoke
+$@
+
+
