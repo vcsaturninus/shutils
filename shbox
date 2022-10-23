@@ -11,8 +11,10 @@
 
 . ./shlib.sh
 
-# Simple pgrep : print the PID(s) associated 
-# with matching process name (substring);
+# Simple pgrep : print the PID(s) associated with matching
+# process name (substring);
+#
+# All PIDS are printed on the same line, whitespace-separated.
 #
 # $1 = proc name string (or substring)
 pgrep(){
@@ -20,11 +22,13 @@ pgrep(){
     # fall back to simpler 'ps ww' on constrained systems with simple ps
     [ ! "$(__exists "$ps_command")" ] && ps_command="ps ww"
     pids="$($ps_command | grep -i "${1:?}" | grep -v -e grep -e "$0" -e "echo")"
-    pids="$(__column_to_list "$pids" " ")"
+    pids="$(__column_to_list "$pids")"
     echo "$pids"
 }
 
-# $1 = progname string or substring
+# Send specified signal (defaults to SIGINT) to all PIDs
+# matching specified process name (sub)string.
+# $1 = process name
 # $2 = signal to send to matching PIDs
 pkill(){
     pids=$(pgrep "${1:?}")

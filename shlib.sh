@@ -4,29 +4,32 @@
 
 # shellcheck shell=sh
 
-# $1
-#   the name of a utility or a utility option to test
-#   for the existence of;
+# Test for the existence of a specified utility or utility option;
+# Echo 1 on success, nothing on failure.
 #
-# echoes true on success, nothing on failure
+# $1 = the name of a utility or a utility option to test
+#      for the existence of;
 __exists(){
     found="$($@ 2>/dev/null 1>&2; echo $?)"
     if [ "$found" -eq 0 ];then
-        echo 1 
+        echo 1
     fi
 }
 
-# $1 = a column of items
+# Format a column of items (first column if multiple columns
+# passed in the input) into a row of items separated by specified
+# seaparator (default to whitespace).
+#
+# $1 = one or more columns of items
 # $2 = separator to use for the result
-# 
-# returns the items on a single separated by separator.
 #
 # NOTES:
 # the format specifier to awk is quoted in single quotation marks
-# to avoid shell expansion; however, we DO want to expand the
-# seaparator so we take advantage of the fact that, like C, the 
-# shell concatenates adjacent strings.
+# to avoid shell expansion; however, we DO want to expand the shell
+# variable representing the separator so we take advantage of
+# fact that, like C, the shell concatenates adjacent strings.
 __column_to_list(){
-    echo "${1:?}" | awk 'BEGIN {ORS="'"${2:?}"'"} {print $1}'
+    sep="${2:- }"
+    echo "${1:?}" | awk 'BEGIN {ORS="'"$sep"'"} {print $1}'
 }
 
